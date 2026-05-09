@@ -1,21 +1,299 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Haowen Jia</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evan's </title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: radial-gradient(circle at top left, #1e3a8a, #020617 45%, #000000);
+      color: #f8fafc;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 60px 0;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 90px;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .nav-links a {
+      color: #cbd5e1;
+      text-decoration: none;
+      margin-left: 24px;
+      font-size: 15px;
+    }
+
+    .nav-links a:hover {
+      color: #38bdf8;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 50px;
+      align-items: center;
+      margin-bottom: 100px;
+    }
+
+    .hero h1 {
+      font-size: 56px;
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 span {
+      color: #38bdf8;
+    }
+
+    .hero p {
+      color: #cbd5e1;
+      font-size: 18px;
+      margin-bottom: 30px;
+      max-width: 620px;
+    }
+
+    .buttons a {
+      display: inline-block;
+      padding: 12px 22px;
+      margin-right: 12px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    .primary-btn {
+      background: #38bdf8;
+      color: #020617;
+    }
+
+    .primary-btn:hover {
+      background: #7dd3fc;
+    }
+
+    .secondary-btn {
+      border: 1px solid #64748b;
+      color: #f8fafc;
+    }
+
+    .secondary-btn:hover {
+      border-color: #38bdf8;
+      color: #38bdf8;
+    }
+
+    .profile-card {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(10px);
+    }
+
+    .circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 44px;
+      font-weight: bold;
+      color: #020617;
+    }
+
+    .profile-card h2 {
+      margin-bottom: 12px;
+    }
+
+    .profile-card p {
+      color: #cbd5e1;
+      font-size: 15px;
+    }
+
+    section {
+      margin-bottom: 80px;
+    }
+
+    section h2 {
+      font-size: 32px;
+      margin-bottom: 24px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: 20px;
+      padding: 26px;
+      transition: 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: #38bdf8;
+    }
+
+    .card h3 {
+      margin-bottom: 12px;
+      color: #e0f2fe;
+    }
+
+    .card p {
+      color: #cbd5e1;
+      font-size: 15px;
+    }
+
+    footer {
+      border-top: 1px solid rgba(148, 163, 184, 0.25);
+      padding-top: 30px;
+      color: #94a3b8;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    @media (max-width: 800px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 42px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      nav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+      }
+
+      .nav-links a {
+        margin-left: 0;
+        margin-right: 18px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-  <h1>Hello, I am Evan.</h1>
-  <p>Physics × AI × Scientific Visualization</p>
+  <div class="container">
+    <nav>
+      <div class="logo">Evan</div>
+      <div class="nav-links">
+        <a href="#about">About</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </nav>
 
-  <h2>About Me</h2>
-  <p>I am interested in physics, artificial intelligence, and scientific visualization.</p>
+    <main class="hero">
+      <div>
+        <h1>Physics, AI, and <span>Scientific Visualization</span></h1>
+        <p>
+          I am interested in using computation, artificial intelligence, and visual design
+          to understand and communicate complex physical systems.
+        </p>
 
-  <h2>Projects</h2>
-  <ul>
-    <li>Physics simulation</li>
-    <li>Machine learning</li>
-    <li>Scientific visualization</li>
-  </ul>
+        <div class="buttons">
+          <a href="#projects" class="primary-btn">View Projects</a>
+          <a href="#contact" class="secondary-btn">Contact Me</a>
+        </div>
+      </div>
+
+      <div class="profile-card">
+        <div class="circle">HJ</div>
+        <h2>Physics × AI</h2>
+        <p>
+          A personal portfolio for simulations, machine learning experiments,
+          research notes, and scientific visualizations.
+        </p>
+      </div>
+    </main>
+
+    <section id="about">
+      <h2>About Me</h2>
+      <p>
+        I have a background in physics and I am interested in artificial intelligence,
+        computational modeling, and scientific visualization. This website is a place
+        where I collect my projects, ideas, and learning notes.
+      </p>
+    </section>
+
+    <section id="projects">
+      <h2>Projects</h2>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Physics Simulation</h3>
+          <p>
+            Interactive simulations of physical systems such as waves, particles,
+            oscillators, and chaotic dynamics.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Machine Learning</h3>
+          <p>
+            Small AI experiments related to data analysis, optimization,
+            and physics-informed learning.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Scientific Visualization</h3>
+          <p>
+            Visual explanations of physical concepts using animation,
+            graphics, and interactive web tools.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <h2>Contact</h2>
+      <p>
+        GitHub: Evan88886666
+      </p>
+    </section>
+
+    <footer>
+      <p>© 2026 Haowen Jia. Built with HTML and CSS.</p>
+    </footer>
+  </div>
 </body>
 </html>
