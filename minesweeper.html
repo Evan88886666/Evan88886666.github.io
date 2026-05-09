@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evan | Minesweeper</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #334155, #020617 55%, #000);
+      color: #f8fafc;
+      font-family: Arial, Helvetica, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+
+    .game-container {
+      display: flex;
+      gap: 28px;
+      align-items: flex-start;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+      max-width: 100%;
+    }
+
+    .board-wrapper {
+      max-width: 100%;
+      overflow: auto;
+      padding-bottom: 4px;
+    }
+
+    .board {
+      display: grid;
+      gap: 2px;
+      background: rgba(148, 163, 184, 0.22);
+      padding: 6px;
+      border-radius: 14px;
+      border: 2px solid #94a3b8;
+    }
+
+    .cell {
+      width: var(--cell-size);
+      height: var(--cell-size);
+      border: none;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #475569, #334155);
+      color: #f8fafc;
+      font-size: calc(var(--cell-size) * 0.55);
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+    }
+
+    .cell:hover {
+      background: linear-gradient(135deg, #64748b, #475569);
+    }
+
+    .cell.revealed {
+      background: #e2e8f0;
+      color: #020617;
+      cursor: default;
+    }
+
+    .cell.mine {
+      background: #ef4444;
+    }
+
+    .cell.flagged {
+      background: #1e293b;
+    }
+
+    .n1 { color: #2563eb; }
+    .n2 { color: #16a34a; }
+    .n3 { color: #dc2626; }
+    .n4 { color: #7c3aed; }
+    .n5 { color: #b45309; }
+    .n6 { color: #0891b2; }
+    .n7 { color: #111827; }
+    .n8 { color: #64748b; }
+
+    .side-panel {
+      width: 250px;
+      flex-shrink: 0;
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 16px;
+      color: #e2e8f0;
+    }
+
+    .difficulty {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .difficulty button {
+      padding: 10px;
+      border-radius: 999px;
+      border: 1px solid #64748b;
+      background: transparent;
+      color: #f8fafc;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .difficulty button:hover,
+    .difficulty button.active {
+      background: #38bdf8;
+      color: #020617;
+      border-color: #38bdf8;
+    }
+
+    .info-box {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .info-box p {
+      color: #cbd5e1;
+      margin-bottom: 8px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      color: #cbd5e1;
+    }
+
+    .info-row span {
+      color: #f8fafc;
+      font-weight: bold;
+    }
+
+    .controls {
+      color: #cbd5e1;
+      line-height: 1.8;
+      font-size: 15px;
+      margin-bottom: 18px;
+    }
+
+    .main-button,
+    .home-link {
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      padding: 12px 16px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+
+    .main-button {
+      border: none;
+      background: #38bdf8;
+      color: #020617;
+    }
+
+    .main-button:hover {
+      background: #7dd3fc;
+    }
+
+    .home-link {
+      border: 1px solid #64748b;
+      color: #f8fafc;
+    }
+
+    .home-link:hover {
+      border-color: #38bdf8;
+      color: #38bdf8;
+    }
+
+    .message {
+      min-height: 28px;
+      font-weight: bold;
+      color: #facc15;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 850px) {
+      body {
+        align-items: flex-start;
+      }
+
+      .game-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .side-panel {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="game-container">
+    <div class="board-wrapper">
+      <div id="board" class="board"></div>
+    </div>
+
+    <div class="side-panel">
+      <h1>Minesweeper</h1>
+
+      <div class="difficulty">
+        <button data-mode="easy" class="active">Easy</button>
+        <button data-mode="medium">Medium</button>
+        <button data-mode="hard">Hard</button>
+        <button data-mode="fullscreen">Fullscreen</button>
+      </div>
+
+      <div class="info-box">
+        <div class="info-row">
+          <p>Mines</p>
+          <span id="minesLeft">0</span>
+        </div>
+        <div class="info-row">
+          <p>Time</p>
+          <span><span id="timer">0</span>s</span>
+        </div>
+        <div class="info-row">
+          <p>Mode</p>
+          <span id="modeText">Easy</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <p><strong>Controls</strong></p>
+        <p>Left Click: Reveal</p>
+        <p>Right Click: Flag Mine</p>
+        <p>Goal: Reveal all safe cells.</p>
+      </div>
+
+      <button class="main-button" onclick="restartGame()">Restart Game</button>
+      <a class="home-link" href="index.html">Back to Home</a>
+
+      <div id="message" class="message"></div>
+    </div>
+  </div>
+
+  <script>
+    const boardElement = document.getElementById("board");
+    const minesLeftElement = document.getElementById("minesLeft");
+    const timerElement = document.getElementById("timer");
+    const modeTextElement = document.getElementById("modeText");
+    const messageElement = document.getElementById("message");
+    const difficultyButtons = document.querySelectorAll(".difficulty button");
+
+    const MODES = {
+      easy: {
+        name: "Easy",
+        rows: 9,
+        cols: 9,
+        mines: 10,
+        cellSize: 34
+      },
+      medium: {
+        name: "Medium",
+        rows: 16,
+        cols: 16,
+        mines: 40,
+        cellSize: 30
+      },
+      hard: {
+        name: "Hard",
+        rows: 16,
+        cols: 30,
+        mines: 99,
+        cellSize: 28
+      }
+    };
+
+    let currentMode = "easy";
+    let rows;
+    let cols;
+    let mines;
+    let cellSize;
+
+    let cells = [];
+    let gameOver = false;
+    let firstMove = true;
+    let flags = 0;
+    let revealedSafeCells = 0;
+
+    let timerId = null;
+    let startTime = null;
+
+    function getFullscreenMode() {
+      const smallScreen = window.innerWidth < 850;
+      const availableWidth = smallScreen ? window.innerWidth - 70 : window.innerWidth - 360;
+      const availableHeight = smallScreen ? window.innerHeight - 360 : window.innerHeight - 140;
+
+      const size = smallScreen ? 22 : 24;
+      const dynamicCols = clamp(Math.floor(availableWidth / size), 14, 42);
+      const dynamicRows = clamp(Math.floor(availableHeight / size), 14, 30);
+      const dynamicMines = Math.floor(dynamicRows * dynamicCols * 0.18);
+
+      return {
+        name: "Fullscreen",
+        rows: dynamicRows,
+        cols: dynamicCols,
+        mines: dynamicMines,
+        cellSize: size
+      };
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+
+      difficultyButtons.forEach(button => {
+        button.classList.toggle("active", button.dataset.mode === mode);
+      });
+
+      if (mode === "fullscreen") {
+        document.documentElement.requestFullscreen?.().catch(() => {});
+      }
+
+      restartGame();
+    }
+
+    difficultyButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        setMode(button.dataset.mode);
+      });
+    });
+
+    function applyModeSettings() {
+      const settings = currentMode === "fullscreen" ? getFullscreenMode() : MODES[currentMode];
+
+      rows = settings.rows;
+      cols = settings.cols;
+      mines = settings.mines;
+      cellSize = settings.cellSize;
+
+      modeTextElement.textContent = settings.name;
+      boardElement.style.gridTemplateColumns = `repeat(${cols}, var(--cell-size))`;
+      boardElement.style.setProperty("--cell-size", `${cellSize}px`);
+    }
+
+    function restartGame() {
+      stopTimer();
+
+      applyModeSettings();
+
+      gameOver = false;
+      firstMove = true;
+      flags = 0;
+      revealedSafeCells = 0;
+      cells = [];
+
+      messageElement.textContent = "";
+      timerElement.textContent = "0";
+      minesLeftElement.textContent = mines;
+
+      createCells();
+      placeMines();
+      calculateNumbers();
+      renderBoard();
+    }
+
+    function createCells() {
+      const total = rows * cols;
+
+      for (let i = 0; i < total; i++) {
+        cells.push({
+          mine: false,
+          revealed: false,
+          flagged: false,
+          number: 0
+        });
+      }
+    }
+
+    function placeMines() {
+      let placed = 0;
+
+      while (placed < mines) {
+        const index = Math.floor(Math.random() * cells.length);
+
+        if (!cells[index].mine) {
+          cells[index].mine = true;
+          placed++;
+        }
+      }
+    }
+
+    function calculateNumbers() {
+      cells.forEach(cell => {
+        cell.number = 0;
+      });
+
+      cells.forEach((cell, index) => {
+        if (cell.mine) return;
+
+        const count = getNeighbors(index).filter(neighborIndex => {
+          return cells[neighborIndex].mine;
+        }).length;
+
+        cell.number = count;
+      });
+    }
+
+    function renderBoard() {
+      boardElement.innerHTML = "";
+
+      cells.forEach((cell, index) => {
+        const button = document.createElement("button");
+        button.className = "cell";
+        button.dataset.index = index;
+
+        button.addEventListener("click", () => {
+          revealCell(index);
+        });
+
+        button.addEventListener("contextmenu", event => {
+          event.preventDefault();
+          toggleFlag(index);
+        });
+
+        boardElement.appendChild(button);
+      });
+
+      updateBoardDisplay();
+    }
+
+    function updateBoardDisplay() {
+      const buttons = boardElement.querySelectorAll(".cell");
+
+      buttons.forEach((button, index) => {
+        const cell = cells[index];
+
+        button.className = "cell";
+        button.textContent = "";
+
+        if (cell.flagged && !cell.revealed) {
+          button.classList.add("flagged");
+          button.textContent = "🚩";
+          return;
+        }
+
+        if (cell.revealed) {
+          button.classList.add("revealed");
+
+          if (cell.mine) {
+            button.classList.add("mine");
+            button.textContent = "💣";
+          } else if (cell.number > 0) {
+            button.classList.add(`n${cell.number}`);
+            button.textContent = cell.number;
+          }
+        }
+      });
+
+      minesLeftElement.textContent = mines - flags;
+    }
+
+    function revealCell(index) {
+      if (gameOver) return;
+
+      const cell = cells[index];
+
+      if (cell.flagged || cell.revealed) return;
+
+      if (firstMove) {
+        startTimer();
+
+        if (cell.mine) {
+          moveMineAway(index);
+        }
+
+        firstMove = false;
+      }
+
+      if (cell.mine) {
+        loseGame(index);
+        return;
+      }
+
+      revealSafeArea(index);
+      updateBoardDisplay();
+      checkWin();
+    }
+
+    function revealSafeArea(startIndex) {
+      const stack = [startIndex];
+
+      while (stack.length > 0) {
+        const index = stack.pop();
+        const cell = cells[index];
+
+        if (cell.revealed || cell.flagged || cell.mine) continue;
+
+        cell.revealed = true;
+        revealedSafeCells++;
+
+        if (cell.number === 0) {
+          getNeighbors(index).forEach(neighborIndex => {
+            const neighbor = cells[neighborIndex];
+
+            if (!neighbor.revealed && !neighbor.flagged && !neighbor.mine) {
+              stack.push(neighborIndex);
+            }
+          });
+        }
+      }
+    }
+
+    function toggleFlag(index) {
+      if (gameOver) return;
+
+      const cell = cells[index];
+
+      if (cell.revealed) return;
+
+      cell.flagged = !cell.flagged;
+      flags += cell.flagged ? 1 : -1;
+
+      updateBoardDisplay();
+    }
+
+    function loseGame(clickedIndex) {
+      gameOver = true;
+      stopTimer();
+
+      cells.forEach(cell => {
+        if (cell.mine) {
+          cell.revealed = true;
+        }
+      });
+
+      cells[clickedIndex].revealed = true;
+      messageElement.textContent = "Game Over!";
+      updateBoardDisplay();
+    }
+
+    function checkWin() {
+      const safeCells = rows * cols - mines;
+
+      if (revealedSafeCells === safeCells) {
+        gameOver = true;
+        stopTimer();
+
+        cells.forEach(cell => {
+          if (cell.mine && !cell.flagged) {
+            cell.flagged = true;
+          }
+        });
+
+        flags = mines;
+        messageElement.textContent = "You Win!";
+        updateBoardDisplay();
+      }
+    }
+
+    function moveMineAway(index) {
+      cells[index].mine = false;
+
+      for (let i = 0; i < cells.length; i++) {
+        if (i !== index && !cells[i].mine) {
+          cells[i].mine = true;
+          break;
+        }
+      }
+
+      calculateNumbers();
+    }
+
+    function getNeighbors(index) {
+      const result = [];
+      const row = Math.floor(index / cols);
+      const col = index % cols;
+
+      for (let r = row - 1; r <= row + 1; r++) {
+        for (let c = col - 1; c <= col + 1; c++) {
+          if (r === row && c === col) continue;
+
+          if (r >= 0 && r < rows && c >= 0 && c < cols) {
+            result.push(r * cols + c);
+          }
+        }
+      }
+
+      return result;
+    }
+
+    function startTimer() {
+      if (timerId) return;
+
+      startTime = Date.now();
+
+      timerId = setInterval(() => {
+        const seconds = Math.floor((Date.now() - startTime) / 1000);
+        timerElement.textContent = seconds;
+      }, 500);
+    }
+
+    function stopTimer() {
+      if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+      }
+    }
+
+    window.addEventListener("resize", () => {
+      if (currentMode === "fullscreen") {
+        restartGame();
+      }
+    });
+
+    restartGame();
+  </script>
+</body>
+</html>
