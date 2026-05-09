@@ -41,7 +41,7 @@
     }
 
     .side-panel {
-      width: 220px;
+      width: 230px;
     }
 
     h1 {
@@ -68,7 +68,7 @@
       font-weight: bold;
     }
 
-    .controls {
+    .info {
       color: #cbd5e1;
       line-height: 1.8;
       margin-bottom: 22px;
@@ -114,7 +114,7 @@
       min-height: 24px;
     }
 
-    @media (max-width: 700px) {
+    @media (max-width: 900px) {
       .game-container {
         flex-direction: column;
         align-items: center;
@@ -129,7 +129,7 @@
 
 <body>
   <div class="game-container">
-    <canvas id="game" width="300" height="600"></canvas>
+    <canvas id="game"></canvas>
 
     <div class="side-panel">
       <h1>Tetris</h1>
@@ -139,13 +139,20 @@
         <span id="score">0</span>
       </div>
 
-      <div class="controls">
+      <div class="score-box">
+        <p>Level</p>
+        <span id="level">1</span>
+      </div>
+
+      <div class="info">
         <p><strong>Controls</strong></p>
         <p>← Move Left</p>
         <p>→ Move Right</p>
         <p>↓ Move Down</p>
         <p>↑ Rotate</p>
         <p>Space Drop</p>
+        <br />
+        <p>The falling speed increases over time.</p>
       </div>
 
       <button onclick="restartGame()">Restart Game</button>
@@ -159,11 +166,16 @@
     const canvas = document.getElementById("game");
     const context = canvas.getContext("2d");
     const scoreElement = document.getElementById("score");
+    const levelElement = document.getElementById("level");
     const gameOverText = document.getElementById("gameOverText");
 
-    const ROWS = 20;
-    const COLS = 10;
-    const BLOCK_SIZE = 30;
+    // Larger game area
+    const ROWS = 24;
+    const COLS = 14;
+    const BLOCK_SIZE = 28;
+
+    canvas.width = COLS * BLOCK_SIZE;
+    canvas.height = ROWS * BLOCK_SIZE;
 
     const COLORS = [
       null,
@@ -190,10 +202,18 @@
     let board;
     let piece;
     let score;
+    let level;
     let gameOver;
-    let dropCounter = 0;
-    let dropInterval = 700;
-    let lastTime = 0;
+    let dropCounter;
+    let dropInterval;
+    let lastTime;
+    let startTime;
+    let animationId;
+
+    const INITIAL_DROP_INTERVAL = 750;
+    const MIN_DROP_INTERVAL = 120;
+    const SPEED_UP_EVERY = 15000;
+    const SPEED_STEP = 55;
 
     function createBoard() {
       return Array.from({ length: ROWS }, () => Array(COLS).fill(0));
@@ -204,7 +224,7 @@
       return {
         matrix: SHAPES[type],
         row: 0,
-        col: Math.floor(COLS / 2) - 1
+        col: Math.floor(COLS / 2) - 2
       };
     }
 
@@ -287,9 +307,20 @@
       }
 
       if (linesCleared > 0) {
-        score += linesCleared * 100;
+        score += linesCleared * 100 * level;
         scoreElement.textContent = score;
       }
+    }
+
+    function updateSpeed(time) {
+      const elapsed = time - startTime;
+      level = Math.floor(elapsed / SPEED_UP_EVERY) + 1;
+      dropInterval = Math.max(
+        MIN_DROP_INTERVAL,
+        INITIAL_DROP_INTERVAL - (level - 1) * SPEED_STEP
+      );
+
+      levelElement.textContent = level;
     }
 
     function movePiece(direction) {
@@ -332,14 +363,14 @@
         gameOver = true;
         gameOverText.textContent = "Game Over!";
       }
+
+      dropCounter = 0;
     }
 
     function rotate(matrix) {
-      const rotated = matrix[0].map((_, index) =>
+      return matrix[0].map((_, index) =>
         matrix.map(row => row[index]).reverse()
       );
-
-      return rotated;
     }
 
     function rotatePiece() {
@@ -355,12 +386,19 @@
       if (gameOver) {
         drawBoard();
         drawPiece();
+        cancelAnimationFrame(animationId);
         return;
+      }
+
+      if (!startTime) {
+        startTime = time;
       }
 
       const deltaTime = time - lastTime;
       lastTime = time;
       dropCounter += deltaTime;
+
+      updateSpeed(time);
 
       if (dropCounter > dropInterval) {
         dropPiece();
@@ -368,19 +406,30 @@
 
       drawBoard();
       drawPiece();
-      requestAnimationFrame(update);
+
+      animationId = requestAnimationFrame(update);
     }
 
     function restartGame() {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+
       board = createBoard();
       piece = createPiece();
       score = 0;
+      level = 1;
       gameOver = false;
       dropCounter = 0;
+      dropInterval = INITIAL_DROP_INTERVAL;
       lastTime = 0;
+      startTime = 0;
+
       scoreElement.textContent = score;
+      levelElement.textContent = level;
       gameOverText.textContent = "";
-      update();
+
+      animationId = requestAnimationFrame(update);
     }
 
     document.addEventListener("keydown", event => {
